@@ -119,7 +119,7 @@ public class LightOverlayTicker {
                 } else {
                     assert Minecraft.getInstance().level != null;
                     var height = Mth.ceil(Minecraft.getInstance().level.getHeight() / 32.0);
-                    var start = Math.floorDiv(Minecraft.getInstance().level.getMinBuildHeight(), 32);
+                    var start = Math.floorDiv(Minecraft.getInstance().level.getMinY(), 32);
                     int playerPosX = ((int) player.getX()) >> 4;
                     int playerPosY = ((int) player.getY()) >> 5;
                     int playerPosZ = ((int) player.getZ()) >> 4;

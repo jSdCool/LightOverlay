@@ -1,5 +1,6 @@
 package me.shedaniel.lightoverlay.common;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
@@ -8,10 +9,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -30,17 +28,25 @@ import java.util.function.Function;
 
 public class LightOverlayRenderer implements Consumer<PoseStack> {
     private static final Function<Double, RenderType.CompositeRenderType> LINE = Util.memoize(
-            double_ -> RenderType.create(
-                    "light_overlay_lines",
-                    DefaultVertexFormat.POSITION_COLOR,
-                    VertexFormat.Mode.DEBUG_LINES,
+//            double_ -> RenderType.create(
+//                    "light_overlay_lines",
+//                    DefaultVertexFormat.POSITION_COLOR,
+//                    VertexFormat.Mode.DEBUG_LINES,
+//                    256,
+//                    RenderType.CompositeState.builder()
+//                            //.setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
+//                            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(double_)))
+//                            //.setTransparencyState()
+//                            //.setCullState(RenderStateShard.NO_CULL)
+//                            .createCompositeState(false)
+//            )
+            double_ -> RenderType.create("light_overlay_lines",
                     256,
+                    RenderPipelines.SUNRISE_SUNSET,
                     RenderType.CompositeState.builder()
-                            .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
                             .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(double_)))
-                            .setTransparencyState(RenderStateShard.NO_TRANSPARENCY)
-                            .setCullState(RenderStateShard.NO_CULL)
                             .createCompositeState(false)
+
             )
     );
     
@@ -74,7 +80,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     private void renderLevels(PoseStack poses, Camera camera, BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange, CollisionContext collisionContext) {
-        RenderSystem.depthMask(true);
+        //RenderSystem.depthMask(true);
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos downMutable = new BlockPos.MutableBlockPos();
         MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -93,7 +99,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
                 }
             }
         }
-        RenderSystem.enableDepthTest();
+        //RenderSystem.enableDepthTest();
     }
     
     public void renderLevel(PoseStack poses, MultiBufferSource.BufferSource source, Camera camera, Level world, BlockPos pos, BlockPos down, byte level, CollisionContext collisionContext) {
