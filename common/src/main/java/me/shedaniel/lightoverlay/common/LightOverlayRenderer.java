@@ -1,7 +1,6 @@
 package me.shedaniel.lightoverlay.common;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
 import net.minecraft.Util;
@@ -26,30 +25,28 @@ import java.util.OptionalDouble;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static net.minecraft.client.renderer.RenderPipelines.MATRICES_PROJECTION_SNIPPET;
+
 public class LightOverlayRenderer implements Consumer<PoseStack> {
+
+    private static final RenderPipeline LINE_PIPELINE = RenderPipeline.builder(new RenderPipeline.Snippet[]{MATRICES_PROJECTION_SNIPPET})
+            .withLocation("pipeline/debug_line_strip")
+            .withVertexShader("core/position_color")
+            .withFragmentShader("core/position_color")
+            .withCull(false)
+            .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.DEBUG_LINES)
+            .build();
     private static final Function<Double, RenderType.CompositeRenderType> LINE = Util.memoize(
-//            double_ -> RenderType.create(
-//                    "light_overlay_lines",
-//                    DefaultVertexFormat.POSITION_COLOR,
-//                    VertexFormat.Mode.DEBUG_LINES,
-//                    256,
-//                    RenderType.CompositeState.builder()
-//                            //.setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
-//                            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(double_)))
-//                            //.setTransparencyState()
-//                            //.setCullState(RenderStateShard.NO_CULL)
-//                            .createCompositeState(false)
-//            )
             double_ -> RenderType.create("light_overlay_lines",
                     256,
-                    RenderPipelines.SUNRISE_SUNSET,
+                    LINE_PIPELINE,
                     RenderType.CompositeState.builder()
                             .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(double_)))
                             .createCompositeState(false)
 
             )
     );
-    
+
     private final Minecraft minecraft = Minecraft.getInstance();
     public Frustum frustum;
     public LightOverlayTicker ticker;
