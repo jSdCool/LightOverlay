@@ -44,8 +44,8 @@ public class LightOverlay {
         // Load Config
         configFile = new File(Platform.getConfigFolder().toFile(), "lightoverlay.properties");
         loadConfig(configFile);
-        
-        enableOverlay = createKeyBinding(ResourceLocation.fromNamespaceAndPath("lightoverlay", "enable_overlay"), InputConstants.Type.KEYSYM, 296, "key.lightoverlay.category");
+
+        enableOverlay = createKeyBinding(ResourceLocation.fromNamespaceAndPath("lightoverlay", "enable_overlay"), InputConstants.Type.KEYSYM, 296, KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath("minecraft","key.lightoverlay.category")));
         KeyMappingRegistry.register(enableOverlay);
         
         registerDebugRenderer(renderer);
@@ -197,7 +197,7 @@ public class LightOverlay {
         fos.close();
     }
     
-    private static KeyMapping createKeyBinding(ResourceLocation id, InputConstants.Type type, int code, String category) {
+    private static KeyMapping createKeyBinding(ResourceLocation id, InputConstants.Type type, int code,  KeyMapping.Category category) {
         return new KeyMapping("key." + id.getNamespace() + "." + id.getPath(), type, code, category);
     }
     
