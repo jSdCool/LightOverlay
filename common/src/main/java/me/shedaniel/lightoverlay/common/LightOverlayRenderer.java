@@ -8,10 +8,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -29,20 +26,16 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class LightOverlayRenderer implements Consumer<PoseStack> {
-    private static final Function<Double, RenderType.CompositeRenderType> LINE = Util.memoize(
-            double_ -> RenderType.create(
-                    "light_overlay_lines",
-                    DefaultVertexFormat.POSITION_COLOR,
-                    VertexFormat.Mode.DEBUG_LINES,
-                    256,
-                    RenderType.CompositeState.builder()
-                            .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
-                            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(double_)))
-                            .setTransparencyState(RenderStateShard.NO_TRANSPARENCY)
-                            .setCullState(RenderStateShard.NO_CULL)
-                            .createCompositeState(false)
-            )
-    );
+
+    private static final Function<Double, RenderType> LINE = Util.memoize((width) -> {
+        RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+                .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(width)))
+                .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
+                .setOutputState(RenderStateShard.ITEM_ENTITY_TARGET)
+                .createCompositeState(false);
+
+        return RenderType.create("light_overlay_lines", 1536, RenderPipelines.LINES, compositeState);
+    });
     
     private final Minecraft minecraft = Minecraft.getInstance();
     public Frustum frustum;
