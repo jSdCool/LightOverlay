@@ -11,6 +11,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.*;
 import static net.minecraft.client.renderer.RenderPipelines.LINES_SNIPPET;
+import static net.minecraft.client.renderer.RenderPipelines.MATRICES_PROJECTION_SNIPPET;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,17 +29,22 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class LightOverlayRenderer implements Consumer<PoseStack> {
-    private static final RenderPipeline LINES_RENDER_PIPELINE = RenderPipeline.builder(LINES_SNIPPET).withLocation("pipeline/lines").withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST).build();
-
-    private static final Function<Double, RenderType> LINE = Util.memoize((width) -> {
-        RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
-                .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(width)))
-                .setLayeringState(RenderStateShard.NO_LAYERING)
-                .setOutputState(RenderStateShard.MAIN_TARGET)
-                .createCompositeState(false);
-
-        return RenderType.create("light_overlay_lines", 1536, LINES_RENDER_PIPELINE, compositeState);
-    });
+    private static final RenderPipeline LINE_PIPELINE = RenderPipeline.builder(MATRICES_PROJECTION_SNIPPET)
+            .withLocation("pipeline/debug_line_strip")
+            .withVertexShader("core/position_color")
+            .withFragmentShader("core/position_color")
+            .withCull(false)
+            .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.DEBUG_LINES)
+            .build();
+    private static final Function<Double, RenderType.CompositeRenderType> LINE = Util.memoize(
+            double_ -> RenderType.create("light_overlay_lines",
+                    256,
+                    LINE_PIPELINE,
+                    RenderType.CompositeState.builder()
+                            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(double_)))
+                            .createCompositeState(false)
+            )
+    );
     
     private final Minecraft minecraft = Minecraft.getInstance();
     public Frustum frustum;
@@ -51,13 +57,13 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     @Override
     public void accept(PoseStack poses) {
         if (LightOverlay.enabled) {
-            LocalPlayer playerEntity = minecraft.player;
+            LocalPlayer playerEntity = Minecraft.getInstance().player;
             BlockPos playerPos = new BlockPos(playerEntity.getBlockX(), playerEntity.getBlockY(), playerEntity.getBlockZ());
             int playerPosX = playerPos.getX() >> 4;
             int playerPosY = playerPos.getY() >> 5;
             int playerPosZ = playerPos.getZ() >> 4;
             CollisionContext collisionContext = CollisionContext.of(playerEntity);
-            Camera camera = minecraft.gameRenderer.getMainCamera();
+            Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
             int chunkRange = LightOverlay.getChunkRange();
             
             if (LightOverlay.showNumber) {
@@ -83,7 +89,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
                 if (mutable.closerThan(playerPos, LightOverlay.reach)) {
                     if (isFrustumVisible(mutable.getX(), mutable.getY(), mutable.getZ(), mutable.getX() + 1, mutable.getX() + 1, mutable.getX() + 1)) {
                         downMutable.set(mutable.getX(), mutable.getY() - 1, mutable.getZ());
-                        renderLevel(poses, source, camera, minecraft.level, mutable, downMutable, objectEntry.getByteValue(), collisionContext);
+                        renderLevel(poses, source, camera, Minecraft.getInstance().level, mutable, downMutable, objectEntry.getByteValue(), collisionContext);
                     }
                 }
             }
@@ -92,7 +98,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     
     public void renderLevel(PoseStack poses, MultiBufferSource.BufferSource source, Camera camera, Level world, BlockPos pos, BlockPos down, byte level, CollisionContext collisionContext) {
         String text = String.valueOf(level);
-        Font font = minecraft.font;
+        Font font = Minecraft.getInstance().font;
         double cameraX = camera.getPosition().x;
         double cameraY = camera.getPosition().y;
         VoxelShape upperOutlineShape = world.getBlockState(down).getShape(world, down, collisionContext);
@@ -132,7 +138,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
                             case LightOverlay.CROSS_YELLOW -> LightOverlay.yellowColor;
                             default -> LightOverlay.secondaryColor;
                         };
-                        renderCross(poses.last().pose(), buffer, camera, minecraft.level, mutable, color, collisionContext);
+                        renderCross(poses.last().pose(), buffer, camera, Minecraft.getInstance().level, mutable, color, collisionContext);
                     }
                 }
             }
