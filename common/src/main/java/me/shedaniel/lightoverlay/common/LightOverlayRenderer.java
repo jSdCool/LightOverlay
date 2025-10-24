@@ -33,8 +33,8 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     private static final Function<Double, RenderType> LINE = Util.memoize((width) -> {
         RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
                 .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(width)))
-                .setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
-                .setOutputState(RenderStateShard.ITEM_ENTITY_TARGET)
+                .setLayeringState(RenderStateShard.NO_LAYERING)
+                .setOutputState(RenderStateShard.MAIN_TARGET)
                 .createCompositeState(false);
 
         return RenderType.create("light_overlay_lines", 1536, LINES_RENDER_PIPELINE, compositeState);
