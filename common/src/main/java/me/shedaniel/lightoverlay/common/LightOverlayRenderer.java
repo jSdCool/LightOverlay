@@ -67,7 +67,9 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     private void renderLevels(PoseStack poses, Camera camera, BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange, CollisionContext collisionContext) {
-        RenderSystem.depthMask(true);
+        // Depth mask seems to be entirely removed from about 1.21.6 and onwards so im hoping that it doesnt affect the result.
+
+        // RenderSystem.depthMask(true);
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos downMutable = new BlockPos.MutableBlockPos();
         MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -86,7 +88,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
                 }
             }
         }
-        RenderSystem.enableDepthTest();
+        // RenderSystem.enableDepthTest();
     }
     
     public void renderLevel(PoseStack poses, MultiBufferSource.BufferSource source, Camera camera, Level world, BlockPos pos, BlockPos down, byte level, CollisionContext collisionContext) {
@@ -154,10 +156,10 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
         float x = pos.getX() - cameraX;
         float y = pos.getY() - cameraY + blockOffset;
         float z = pos.getZ() - cameraZ;
-        builder.addVertex(pose, x + .01f, y, z + .01f).setColor(red, green, blue, 255);
-        builder.addVertex(pose, x + .99f, y, z + .99f).setColor(red, green, blue, 255);
-        builder.addVertex(pose, x + .99f, y, z + .01f).setColor(red, green, blue, 255);
-        builder.addVertex(pose, x + .01f, y, z + .99f).setColor(red, green, blue, 255);
+        builder.addVertex(pose, x + .01f, y, z + .01f).setColor(red, green, blue, 255).setNormal(0.0f, 1.0f, 0.0f);
+        builder.addVertex(pose, x + .99f, y, z + .99f).setColor(red, green, blue, 255).setNormal(0.0f, 1.0f, 0.0f);
+        builder.addVertex(pose, x + .99f, y, z + .01f).setColor(red, green, blue, 255).setNormal(0.0f, 1.0f, 0.0f);
+        builder.addVertex(pose, x + .01f, y, z + .99f).setColor(red, green, blue, 255).setNormal(0.0f, 1.0f, 0.0f);
     }
     
     public boolean isFrustumVisible(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
