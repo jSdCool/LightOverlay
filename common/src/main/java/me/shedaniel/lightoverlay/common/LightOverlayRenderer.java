@@ -1,6 +1,7 @@
 package me.shedaniel.lightoverlay.common;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.pipeline.*;
+import com.mojang.blaze3d.platform.*;
 import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
 import net.minecraft.Util;
@@ -9,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.*;
+import static net.minecraft.client.renderer.RenderPipelines.LINES_SNIPPET;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,6 +28,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class LightOverlayRenderer implements Consumer<PoseStack> {
+    private static final RenderPipeline LINES_RENDER_PIPELINE = RenderPipeline.builder(LINES_SNIPPET).withLocation("pipeline/lines").withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST).build();
 
     private static final Function<Double, RenderType> LINE = Util.memoize((width) -> {
         RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
@@ -34,7 +37,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
                 .setOutputState(RenderStateShard.ITEM_ENTITY_TARGET)
                 .createCompositeState(false);
 
-        return RenderType.create("light_overlay_lines", 1536, RenderPipelines.LINES, compositeState);
+        return RenderType.create("light_overlay_lines", 1536, LINES_RENDER_PIPELINE, compositeState);
     });
     
     private final Minecraft minecraft = Minecraft.getInstance();
@@ -67,9 +70,6 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     private void renderLevels(PoseStack poses, Camera camera, BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange, CollisionContext collisionContext) {
-        // Depth mask seems to be entirely removed from about 1.21.6 and onwards so im hoping that it doesnt affect the result.
-
-        // RenderSystem.depthMask(true);
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos downMutable = new BlockPos.MutableBlockPos();
         MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -88,7 +88,6 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
                 }
             }
         }
-        // RenderSystem.enableDepthTest();
     }
     
     public void renderLevel(PoseStack poses, MultiBufferSource.BufferSource source, Camera camera, Level world, BlockPos pos, BlockPos down, byte level, CollisionContext collisionContext) {
