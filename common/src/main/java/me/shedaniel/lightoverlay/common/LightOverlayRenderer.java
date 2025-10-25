@@ -46,7 +46,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
             )
     );
     
-    private final Minecraft minecraft = Minecraft.getInstance();
+
     public Frustum frustum;
     public LightOverlayTicker ticker;
     
@@ -56,6 +56,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     
     @Override
     public void accept(PoseStack poses) {
+        Minecraft minecraft = Minecraft.getInstance();
         if (LightOverlay.enabled) {
             LocalPlayer playerEntity = minecraft.player;
             BlockPos playerPos = new BlockPos(playerEntity.getBlockX(), playerEntity.getBlockY(), playerEntity.getBlockZ());
@@ -76,6 +77,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     private void renderLevels(PoseStack poses, Camera camera, BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange, CollisionContext collisionContext) {
+        Minecraft minecraft = Minecraft.getInstance();
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos downMutable = new BlockPos.MutableBlockPos();
         MultiBufferSource.BufferSource source = minecraft.renderBuffers().bufferSource();
@@ -97,6 +99,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     public void renderLevel(PoseStack poses, MultiBufferSource.BufferSource source, Camera camera, Level world, BlockPos pos, BlockPos down, byte level, CollisionContext collisionContext) {
+        Minecraft minecraft = Minecraft.getInstance();
         String text = String.valueOf(level);
         Font font = minecraft.font;
         double cameraX = camera.getPosition().x;
@@ -118,6 +121,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     private void renderCrosses(PoseStack poses, Camera camera, BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange, CollisionContext collisionContext) {
+        Minecraft minecraft = Minecraft.getInstance();
         MultiBufferSource.BufferSource source = minecraft.renderBuffers().bufferSource();
         VertexConsumer buffer = source.getBuffer(LINE.apply((double) LightOverlay.lineWidth));
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
