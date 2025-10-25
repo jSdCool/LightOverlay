@@ -57,13 +57,13 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     @Override
     public void accept(PoseStack poses) {
         if (LightOverlay.enabled) {
-            LocalPlayer playerEntity = Minecraft.getInstance().player;
+            LocalPlayer playerEntity = minecraft.player;
             BlockPos playerPos = new BlockPos(playerEntity.getBlockX(), playerEntity.getBlockY(), playerEntity.getBlockZ());
             int playerPosX = playerPos.getX() >> 4;
             int playerPosY = playerPos.getY() >> 5;
             int playerPosZ = playerPos.getZ() >> 4;
             CollisionContext collisionContext = CollisionContext.of(playerEntity);
-            Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+            Camera camera = minecraft.gameRenderer.getMainCamera();
             int chunkRange = LightOverlay.getChunkRange();
             
             if (LightOverlay.showNumber) {
@@ -71,14 +71,14 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
             } else {
                 renderCrosses(poses, camera, playerPos, playerPosX, playerPosY, playerPosZ, chunkRange, collisionContext);
             }
-            Minecraft.getInstance().renderBuffers().bufferSource().endLastBatch();
+            minecraft.renderBuffers().bufferSource().endLastBatch();
         }
     }
     
     private void renderLevels(PoseStack poses, Camera camera, BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange, CollisionContext collisionContext) {
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos downMutable = new BlockPos.MutableBlockPos();
-        MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
+        MultiBufferSource.BufferSource source = minecraft.renderBuffers().bufferSource();
         for (Map.Entry<CubicChunkPos, Long2ByteMap> entry : ticker.CHUNK_MAP.entrySet()) {
             CubicChunkPos chunkPos = entry.getKey();
             if (LightOverlay.caching && (Mth.abs(chunkPos.x - playerPosX) > chunkRange || Mth.abs(chunkPos.y - playerPosY) > Math.max(1, chunkRange >> 1) || Mth.abs(chunkPos.z - playerPosZ) > chunkRange)) {
@@ -89,7 +89,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
                 if (mutable.closerThan(playerPos, LightOverlay.reach)) {
                     if (isFrustumVisible(mutable.getX(), mutable.getY(), mutable.getZ(), mutable.getX() + 1, mutable.getX() + 1, mutable.getX() + 1)) {
                         downMutable.set(mutable.getX(), mutable.getY() - 1, mutable.getZ());
-                        renderLevel(poses, source, camera, Minecraft.getInstance().level, mutable, downMutable, objectEntry.getByteValue(), collisionContext);
+                        renderLevel(poses, source, camera, minecraft.level, mutable, downMutable, objectEntry.getByteValue(), collisionContext);
                     }
                 }
             }
@@ -98,7 +98,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     
     public void renderLevel(PoseStack poses, MultiBufferSource.BufferSource source, Camera camera, Level world, BlockPos pos, BlockPos down, byte level, CollisionContext collisionContext) {
         String text = String.valueOf(level);
-        Font font = Minecraft.getInstance().font;
+        Font font = minecraft.font;
         double cameraX = camera.getPosition().x;
         double cameraY = camera.getPosition().y;
         VoxelShape upperOutlineShape = world.getBlockState(down).getShape(world, down, collisionContext);
@@ -118,7 +118,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     private void renderCrosses(PoseStack poses, Camera camera, BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange, CollisionContext collisionContext) {
-        MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
+        MultiBufferSource.BufferSource source = minecraft.renderBuffers().bufferSource();
         VertexConsumer buffer = source.getBuffer(LINE.apply((double) LightOverlay.lineWidth));
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         
@@ -138,7 +138,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
                             case LightOverlay.CROSS_YELLOW -> LightOverlay.yellowColor;
                             default -> LightOverlay.secondaryColor;
                         };
-                        renderCross(poses.last().pose(), buffer, camera, Minecraft.getInstance().level, mutable, color, collisionContext);
+                        renderCross(poses.last().pose(), buffer, camera, minecraft.level, mutable, color, collisionContext);
                     }
                 }
             }
