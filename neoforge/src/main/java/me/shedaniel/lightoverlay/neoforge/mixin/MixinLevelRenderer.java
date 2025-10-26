@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LevelRenderer.class)
 public class MixinLevelRenderer {
-    @Inject(method = "setupRender", at = @At("HEAD"))
-    private void setupTerrain(Camera camera, Frustum frustum, boolean bl, boolean bl2, CallbackInfo ci) {
+    @Inject(method = "cullTerrain", at = @At("HEAD"))
+    private void setupTerrain(Camera arg, Frustum frustum, boolean bl, CallbackInfo ci) {
         LightOverlayImpl.renderer.frustum = frustum;
     }
 }

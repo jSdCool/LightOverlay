@@ -198,7 +198,7 @@ public class LightOverlay {
     }
     
     private static KeyMapping createKeyBinding(ResourceLocation id, InputConstants.Type type, int code, String category) {
-        return new KeyMapping("key." + id.getNamespace() + "." + id.getPath(), type, code, category);
+        return new KeyMapping("key." + id.getNamespace() + "." + id.getPath(), type, code, KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath("lightoverlay", category)));
     }
     
     
