@@ -8,6 +8,7 @@ import dev.architectury.injectables.targets.ArchitecturyTarget;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.components.debug.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
@@ -49,18 +50,7 @@ public class LightOverlay {
         KeyMappingRegistry.register(enableOverlay);
         
         registerDebugRenderer(renderer);
-        
-        ClientGuiEvent.DEBUG_TEXT_LEFT.register(list -> {
-            if (enabled) {
-                if (caching) {
-                    list.add(String.format("[Light Overlay] Chunks to queue: %02d", ticker.POS.size()));
-                } else {
-                    list.add("[Light Overlay] Enabled");
-                }
-            } else {
-                list.add("[Light Overlay] Disabled");
-            }
-        });
+        DebugScreenEntries.register(ResourceLocation.fromNamespaceAndPath("lightoverlay", "debug"), new DebugEntryLightOverlay());
         ClientTickEvent.CLIENT_POST.register(ticker::tick);
     }
     
