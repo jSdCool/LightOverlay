@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gizmos.Gizmos;
+import net.minecraft.gizmos.TextGizmo;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.Level;
@@ -108,27 +109,11 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     public void renderLevel(PoseStack poses, MultiBufferSource.BufferSource source, Camera camera, Level world, BlockPos pos, BlockPos down, byte level, CollisionContext collisionContext) {
-        Minecraft minecraft = Minecraft.getInstance();
         String text = String.valueOf(level);
-//        Font font = minecraft.font;
-//        double cameraX = camera.position().x;
-//        double cameraY = camera.position().y;
-//        VoxelShape upperOutlineShape = world.getBlockState(down).getShape(world, down, collisionContext);
-//        if (!upperOutlineShape.isEmpty())
-//            cameraY += 1 - upperOutlineShape.max(Direction.Axis.Y);
-//        double cameraZ = camera.position().z;
-//        poses.pushPose();
-//        poses.translate(pos.getX() + 0.5 - cameraX, pos.getY() - cameraY + 0.005, pos.getZ() + 0.5 - cameraZ);
-//        poses.mulPose(new Quaternionf().fromAxisAngleDeg(1, 0, 0, 90));
-////        poses.glNormal3f(0.0F, 1.0F, 0.0F);
-//        float size = 0.07F;
-//        poses.scale(-size, -size, size);
-//        float float_3 = (float) (-font.width(text)) / 2.0F + 0.4f;
-//        font.drawInBatch(text, float_3, -3.5f, level > LightOverlay.higherCrossLevel ? 0xff042404 : (LightOverlay.lowerCrossLevel >= 0 && level > LightOverlay.lowerCrossLevel ? 0xff0066ff : 0xff731111),
-//                false, poses.last().pose(), source, Font.DisplayMode.SEE_THROUGH, 0, 15728880);
-//        poses.popPose();
         int color = level > LightOverlay.higherCrossLevel ? 0xff042404 : (LightOverlay.lowerCrossLevel >= 0 && level > LightOverlay.lowerCrossLevel ? 0xff0066ff : 0xff731111);
-        Gizmos.billboardTextOverBlock(text,down,1,color,1);
+        Gizmos.billboardText(text,Vec3.atLowerCornerWithOffset(down, 0.5, 1.3 + 1 * 0.2, 0.5), TextGizmo.Style.forColorAndCentered(color).withScale(1));
+//        Gizmos.billboardTextOverBlock(text,down,1,color,1);
+
     }
     
     private void renderCrosses(BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange, CollisionContext collisionContext) {
