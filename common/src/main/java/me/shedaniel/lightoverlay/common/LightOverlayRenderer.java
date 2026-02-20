@@ -4,17 +4,13 @@ import com.mojang.blaze3d.pipeline.*;
 import com.mojang.blaze3d.platform.*;
 import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.*;
-import static net.minecraft.client.renderer.RenderPipelines.LINES_SNIPPET;
 import static net.minecraft.client.renderer.RenderPipelines.MATRICES_PROJECTION_SNIPPET;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gizmos.Gizmos;
@@ -65,7 +61,7 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     @Override
-    public void accept(PoseStack poses) {
+    public void accept(PoseStack poses) {//this parameter is not necessary anymore
         Minecraft minecraft = Minecraft.getInstance();
         if (LightOverlay.enabled) {
             LocalPlayer playerEntity = minecraft.player;
@@ -74,11 +70,10 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
             int playerPosY = playerPos.getY() >> 5;
             int playerPosZ = playerPos.getZ() >> 4;
             CollisionContext collisionContext = CollisionContext.of(playerEntity);
-            Camera camera = minecraft.gameRenderer.getMainCamera();
             int chunkRange = LightOverlay.getChunkRange();
             
             if (LightOverlay.showNumber) {
-                renderLevels(poses, camera, playerPos, playerPosX, playerPosY, playerPosZ, chunkRange, collisionContext);
+                renderLevels(playerPos, playerPosX, playerPosY, playerPosZ, chunkRange);
             } else {
                 renderCrosses(playerPos, playerPosX, playerPosY, playerPosZ, chunkRange, collisionContext);
             }
@@ -86,11 +81,9 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
         }
     }
     
-    private void renderLevels(PoseStack poses, Camera camera, BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange, CollisionContext collisionContext) {
-        Minecraft minecraft = Minecraft.getInstance();
+    private void renderLevels(BlockPos playerPos, int playerPosX, int playerPosY, int playerPosZ, int chunkRange) {
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos downMutable = new BlockPos.MutableBlockPos();
-        MultiBufferSource.BufferSource source = minecraft.renderBuffers().bufferSource();
         for (Map.Entry<CubicChunkPos, Long2ByteMap> entry : ticker.CHUNK_MAP.entrySet()) {
             CubicChunkPos chunkPos = entry.getKey();
             if (LightOverlay.caching && (Mth.abs(chunkPos.x - playerPosX) > chunkRange || Mth.abs(chunkPos.y - playerPosY) > Math.max(1, chunkRange >> 1) || Mth.abs(chunkPos.z - playerPosZ) > chunkRange)) {
@@ -101,14 +94,14 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
                 if (mutable.closerThan(playerPos, LightOverlay.reach)) {
                     if (isFrustumVisible(mutable.getX(), mutable.getY(), mutable.getZ(), mutable.getX() + 1, mutable.getX() + 1, mutable.getX() + 1)) {
                         downMutable.set(mutable.getX(), mutable.getY() - 1, mutable.getZ());
-                        renderLevel(poses, source, camera, minecraft.level, mutable, downMutable, objectEntry.getByteValue(), collisionContext);
+                        renderLevel(downMutable, objectEntry.getByteValue());
                     }
                 }
             }
         }
     }
     
-    public void renderLevel(PoseStack poses, MultiBufferSource.BufferSource source, Camera camera, Level world, BlockPos pos, BlockPos down, byte level, CollisionContext collisionContext) {
+    public void renderLevel(BlockPos down, byte level) {
         String text = String.valueOf(level);
         int color = level > LightOverlay.higherCrossLevel ? 0xff042404 : (LightOverlay.lowerCrossLevel >= 0 && level > LightOverlay.lowerCrossLevel ? 0xff0066ff : 0xff731111);
         Gizmos.billboardText(text,Vec3.atLowerCornerWithOffset(down, 0.5, 1.3 + 1 * 0.2, 0.5), TextGizmo.Style.forColorAndCentered(color).withScale(1));
@@ -156,8 +149,8 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
         float x = pos.getX()/* - cameraX*/;
         float y = pos.getY()/* - cameraY*/ + blockOffset;
         float z = pos.getZ()/* - cameraZ*/;
-        Gizmos.line(new Vec3(x + .01f, y, z + .01f),new Vec3(x + .99f, y, z + .99f),color);
-        Gizmos.line(new Vec3(x + .99f, y, z + .01f),new Vec3(x + .01f, y, z + .99f),color);
+        Gizmos.line(new Vec3(x + .01f, y, z + .01f),new Vec3(x + .99f, y, z + .99f),color,LightOverlay.lineWidth);
+        Gizmos.line(new Vec3(x + .99f, y, z + .01f),new Vec3(x + .01f, y, z + .99f),color,LightOverlay.lineWidth);
     }
     
     public boolean isFrustumVisible(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
