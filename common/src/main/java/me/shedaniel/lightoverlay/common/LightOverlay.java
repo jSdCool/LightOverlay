@@ -9,7 +9,7 @@ import dev.architectury.platform.Platform;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.components.debug.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.io.File;
@@ -46,11 +46,11 @@ public class LightOverlay {
         configFile = new File(Platform.getConfigFolder().toFile(), "lightoverlay.properties");
         loadConfig(configFile);
         
-        enableOverlay = createKeyBinding(ResourceLocation.fromNamespaceAndPath("lightoverlay", "enable_overlay"), InputConstants.Type.KEYSYM, 296, "key.lightoverlay.category");
+        enableOverlay = createKeyBinding(Identifier.fromNamespaceAndPath("lightoverlay", "enable_overlay"), InputConstants.Type.KEYSYM, 296, "key.lightoverlay.category");
         KeyMappingRegistry.register(enableOverlay);
         
         registerDebugRenderer(renderer);
-        DebugScreenEntries.register(ResourceLocation.fromNamespaceAndPath("lightoverlay", "debug"), new DebugEntryLightOverlay());
+        DebugScreenEntries.register(Identifier.fromNamespaceAndPath("lightoverlay", "debug"), new DebugEntryLightOverlay());
         ClientTickEvent.CLIENT_POST.register(ticker::tick);
     }
     
@@ -187,8 +187,8 @@ public class LightOverlay {
         fos.close();
     }
     
-    private static KeyMapping createKeyBinding(ResourceLocation id, InputConstants.Type type, int code, String category) {
-        return new KeyMapping("key." + id.getNamespace() + "." + id.getPath(), type, code, KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath("lightoverlay", category)));
+    private static KeyMapping createKeyBinding(Identifier id, InputConstants.Type type, int code, String category) {
+        return new KeyMapping("key." + id.getNamespace() + "." + id.getPath(), type, code, KeyMapping.Category.register(Identifier.fromNamespaceAndPath("lightoverlay", category)));
     }
     
     

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.*;
 import com.mojang.blaze3d.platform.*;
 import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
-import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -13,9 +12,13 @@ import net.minecraft.client.renderer.*;
 import static net.minecraft.client.renderer.RenderPipelines.LINES_SNIPPET;
 import static net.minecraft.client.renderer.RenderPipelines.MATRICES_PROJECTION_SNIPPET;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -36,14 +39,18 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
             .withCull(false)
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.DEBUG_LINES)
             .build();
-    private static final Function<Double, RenderType.CompositeRenderType> LINE = Util.memoize(
+    private static final Function<Object, RenderType> LINE = Util.memoize(
             double_ -> RenderType.create("light_overlay_lines",
-                    256,
-                    LINE_PIPELINE,
+                    RenderSetup.builder(LINE_PIPELINE).createRenderSetup()
+            )
+            /*
+            256,
+                    ,
                     RenderType.CompositeState.builder()
                             .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(double_)))
                             .createCompositeState(false)
-            )
+            */
+
     );
     
 
@@ -102,12 +109,12 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
         Minecraft minecraft = Minecraft.getInstance();
         String text = String.valueOf(level);
         Font font = minecraft.font;
-        double cameraX = camera.getPosition().x;
-        double cameraY = camera.getPosition().y;
+        double cameraX = camera.position().x;
+        double cameraY = camera.position().y;
         VoxelShape upperOutlineShape = world.getBlockState(down).getShape(world, down, collisionContext);
         if (!upperOutlineShape.isEmpty())
             cameraY += 1 - upperOutlineShape.max(Direction.Axis.Y);
-        double cameraZ = camera.getPosition().z;
+        double cameraZ = camera.position().z;
         poses.pushPose();
         poses.translate(pos.getX() + 0.5 - cameraX, pos.getY() - cameraY + 0.005, pos.getZ() + 0.5 - cameraZ);
         poses.mulPose(new Quaternionf().fromAxisAngleDeg(1, 0, 0, 90));
@@ -150,14 +157,14 @@ public class LightOverlayRenderer implements Consumer<PoseStack> {
     }
     
     public void renderCross(Matrix4f pose, VertexConsumer builder, Camera camera, Level world, BlockPos pos, int color, CollisionContext collisionContext) {
-        float cameraX = (float) camera.getPosition().x;
-        float cameraY = (float) camera.getPosition().y - .005f;
+        float cameraX = (float) camera.position().x;
+        float cameraY = (float) camera.position().y - .005f;
         float blockOffset = 0;
         VoxelShape upperOutlineShape = world.getBlockState(pos).getShape(world, pos, collisionContext);
         if (!upperOutlineShape.isEmpty()) {
             blockOffset += upperOutlineShape.max(Direction.Axis.Y);
         }
-        float cameraZ = (float) camera.getPosition().z;
+        float cameraZ = (float) camera.position().z;
         
         int red = (color >> 16) & 255;
         int green = (color >> 8) & 255;
